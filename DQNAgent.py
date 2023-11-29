@@ -7,7 +7,7 @@ from collections import deque
 import random
 
 class DQNAgent:
-    def __init__(self, state_shape, action_size, max_mem=10):
+    def __init__(self, state_shape, action_size, max_mem=4000):
         self.state_shape = state_shape
         self.action_size = action_size
         self.memory = deque(maxlen=max_mem)
@@ -26,7 +26,7 @@ class DQNAgent:
             Dense(64, activation='selu'),
             Dense(self.action_size, activation='linear')
         ])
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
+        model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))
         return model
 
     def remember(self, state, action, reward, next_state, done):
@@ -35,34 +35,38 @@ class DQNAgent:
     def act(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
-        q_values = self.model.predict(state)
+        q_values = self.model.predict(np.reshape(state, [1, 240, 256, 3]))
         return np.argmax(q_values[0])
 
     def replay(self, batch_size):
+        print("Replaying")
         minibatch = random.sample(self.memory, batch_size)
-        for state, action, reward, next_state, done in minibatch:
-            target = self.model.predict(state)
+        states = np.array([s[0] for s in minibatch])
+        futures = np.max(self.model.predict([f[3] for f in minibatch]), axis=1)
+        targets = np.array(self.model.predict(states))
+        for i, (state, action, reward, next_state, done) in minibatch:
             if done:
-                target[0][action] = reward
+                targets[i][action] = reward
             else:
-                Q_future = max(self.model.predict(next_state)[0])
-                target[0][action] = reward + Q_future * self.gamma
-            self.model.fit(state, target, epochs=1, verbose=0)
+                targets[i][action] = reward + futures[i] * self.gamma
+        
+        self.model.fit(states, targets, verbose=0)
+        
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
             
     def save(self, filename):
         self.model.save(filename)
-            
-class MockDQNAgent:
-    def __init__(self, state_shape, action_size, max_mem=10):
-        self.action_size = action_size
+                
+    class MockDQNAgent:
+        def __init__(self, state_shape, action_size, max_mem=10):
+            self.action_size = action_size
 
-    def _build_model(self):
-        pass
+        def _build_model(self):
+            pass
 
-    def remember(self, state, action, reward, next_state, done):
-        pass
+        def remember(self, state, action, reward, next_state, done):
+            pass
 
     def act(self, state):
         return random.randrange(self.action_size)

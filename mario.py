@@ -1,23 +1,3 @@
-# from nes_py.wrappers import JoypadSpace
-# import gym_super_mario_bros
-# from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-# import gym
-# import DQNAgent
-
-# env = gym.make('SuperMarioBros-v0', apply_api_compatibility=True, render_mode="human")
-# env = JoypadSpace(env, SIMPLE_MOVEMENT)
-
-# done = True
-# env.reset()
-# for step in range(5000):
-#     action = env.action_space.sample()
-#     print(action)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     done = terminated or truncated
-
-#     if done:
-#        env.reset()
-
 from nes_py.wrappers import JoypadSpace
 import gym_super_mario_bros
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
@@ -26,12 +6,12 @@ from DQNAgent import DQNAgent
 import numpy as np
 import matplotlib.pyplot as plt
 
-env = gym.make('SuperMarioBros-v3', apply_api_compatibility=True, render_mode="human")
+env = gym.make('SuperMarioBros-v3', apply_api_compatibility=True)#, render_mode="human")
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
 state_shape = env.observation_space.shape
 action_size = env.action_space.n
-EPISODES = 2
+EPISODES = 500
 agent = DQNAgent(state_shape, action_size)
 
 done = False
@@ -40,9 +20,7 @@ batch_size = 32
 scores = []
 moving_avg_scores = []
 for e in range(EPISODES):
-    e = env.reset()
-    state = e[0]
-    print(e[1])
+    state, info = env.reset()
     # image = np.reshape(state[0], [1, state_shape[0], state_shape[1], state_shape[2]])
     for time in range(5000):
         action = agent.act(state)
@@ -68,5 +46,5 @@ plt.plot(moving_avg_scores, label='Moving average (last 100)')
 plt.xlabel('Episode')
 plt.ylabel('Score')
 plt.legend()
-plt.show()
 plt.savefig('mario_scores.png')
+plt.show()
