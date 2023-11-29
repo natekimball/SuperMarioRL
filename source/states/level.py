@@ -192,33 +192,34 @@ class Level(tools.State):
         
     def update(self, surface, keys, current_time):
         self.game_info[c.CURRENT_TIME] = self.current_time = current_time
-        self.handle_states(keys)
+        reward = self.handle_states(keys)
         self.draw(surface)
+        return reward
     
     def handle_states(self, keys):
-        self.update_all_sprites(keys)
+        return self.update_all_sprites(keys)
     
     def update_all_sprites(self, keys):
         if self.player.dead:
-            self.player.update(keys, self.game_info, self.powerup_group)
+            reward = self.player.update(keys, self.game_info, self.powerup_group)
             if self.current_time - self.death_timer > 3000:
                 self.update_game_info()
                 self.done = True
         elif self.player.state == c.IN_CASTLE:
-            self.player.update(keys, self.game_info, None)
+            reward = self.player.update(keys, self.game_info, None)
             self.flagpole_group.update()
             if self.current_time - self.castle_timer > 2000:
                 self.update_game_info()
                 self.done = True
         elif self.in_frozen_state():
-            self.player.update(keys, self.game_info, None)
+            reward = self.player.update(keys, self.game_info, None)
             self.check_checkpoints()
             self.update_viewport()
             self.overhead_info.update(self.game_info, self.player)
             for score in self.moving_score_list:
                 score.update(self.moving_score_list)
         else:
-            self.player.update(keys, self.game_info, self.powerup_group)
+            reward = self.player.update(keys, self.game_info, self.powerup_group)
             self.flagpole_group.update()
             self.check_checkpoints()
             self.slider_group.update()
@@ -237,6 +238,7 @@ class Level(tools.State):
             self.overhead_info.update(self.game_info, self.player)
             for score in self.moving_score_list:
                 score.update(self.moving_score_list)
+        return reward
     
     def check_checkpoints(self):
         checkpoint = pg.sprite.spritecollideany(self.player, self.checkpoint_group)

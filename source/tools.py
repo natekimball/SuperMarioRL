@@ -3,14 +3,19 @@ __author__ = 'marble_xu'
 import os
 import pygame as pg
 from abc import ABC, abstractmethod
+import numpy as np
+from source.DQNAgent import DQNAgent
 
 keybinding = {
     'action':pg.K_s,
-    'jump':pg.K_a,
+    'jump':pg.K_UP,
     'left':pg.K_LEFT,
     'right':pg.K_RIGHT,
     'down':pg.K_DOWN
 }
+
+actions = ['action', 'jump', 'left', 'right', 'down']
+keys = [pg.K_s, pg.K_UP, pg.K_LEFT, pg.K_RIGHT, pg.K_DOWN]
 
 class State():
     def __init__(self):
@@ -49,11 +54,11 @@ class Control():
         self.state_name = start_state
         self.state = self.state_dict[self.state_name]
     
-    def update(self):
-        self.current_time = pg.time.get_ticks()
-        if self.state.done:
-            self.flip_state()
-        self.state.update(self.screen, self.keys, self.current_time)
+    # def update(self):
+        # self.current_time = pg.time.get_ticks()
+        # if self.state.done:
+        #     self.flip_state()
+        # reward = self.state.update(self.screen, self.keys, self.current_time)
     
     def flip_state(self):
         previous, self.state_name = self.state_name, self.state.next
@@ -61,22 +66,37 @@ class Control():
         self.state = self.state_dict[self.state_name]
         self.state.startup(self.current_time, persist)
 
-    def event_loop(self):
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                self.done = True
-            elif event.type == pg.KEYDOWN:
-                self.keys = pg.key.get_pressed()
-            elif event.type == pg.KEYUP:
-                self.keys = pg.key.get_pressed()
+    # def event_loop(self):
+    #     for event in pg.event.get():
+    #         if event.type == pg.QUIT:
+    #             self.done = True
+    #         elif event.type == pg.KEYDOWN:
+    #             self.keys = pg.key.get_pressed()
+    #         elif event.type == pg.KEYUP:
+    #             self.keys = pg.key.get_pressed()
     
-    def main(self):
-        while not self.done:
-            self.event_loop()
-            self.update()
-            pg.display.update()
-            self.clock.tick(self.fps)
-
+    def get_state(self):
+        return pg.surfarray.array3d(self.screen)
+    
+    def main(self, episodes=1000):
+        agent = DQNAgent(self.screen.get_size() + (3,), 3)
+        for e in range(episodes):
+            while not self.state.done:
+                self.current_time = pg.time.get_ticks()
+                state = self.get_state()
+                print("state shape: ", state.shape)
+                action = agent.act(state)
+                for k in keys:
+                    self.keys[k] = False
+                key = keybinding[actions[action]]
+                self.keys[key] = True
+                reward = self.state.update(self.screen, action, self.current_time)
+                agent.remember(state, action, reward, state, False)
+                pg.display.update()
+                self.clock.tick(self.fps)
+            self.flip_state()
+            print(f"episode: {e}/{episodes}, score: {self.state.score}")
+            
 def get_image(sheet, x, y, width, height, colorkey, scale):
         image = pg.Surface([width, height])
         rect = image.get_rect()

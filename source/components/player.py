@@ -131,23 +131,33 @@ class Player(pg.sprite.Sprite):
 
     def update(self, keys, game_info, fire_group):
         self.current_time = game_info[c.CURRENT_TIME]
-        self.handle_state(keys, fire_group)
+        reward = self.handle_state(keys, fire_group)
         self.check_if_hurt_invincible()
         self.check_if_invincible()
         self.animation()
+        return reward
 
     def handle_state(self, keys, fire_group):
+        reward = 0
         if self.state == c.STAND:
             self.standing(keys, fire_group)
         elif self.state == c.WALK:
+            # if walking right, +1 else -1
+            if keys[tools.keybinding['right']]:
+                reward = 1
+            elif keys[tools.keybinding['left']]:
+                reward = -1
             self.walking(keys, fire_group)
         elif self.state == c.JUMP:
+            reward = .5
             self.jumping(keys, fire_group)
         elif self.state == c.FALL:
             self.falling(keys, fire_group)
         elif self.state == c.DEATH_JUMP:
+            reward = -25
             self.jumping_to_death()
         elif self.state == c.FLAGPOLE:
+            reward = 100
             self.flag_pole_sliding()
         elif self.state == c.WALK_AUTO:
             self.walking_auto()
@@ -156,10 +166,13 @@ class Player(pg.sprite.Sprite):
         elif self.state == c.IN_CASTLE:
             self.frame_index = 0
         elif self.state == c.SMALL_TO_BIG:
+            reward = 10
             self.changing_to_big()
         elif self.state == c.BIG_TO_SMALL:
+            reward = -25
             self.changing_to_small()
         elif self.state == c.BIG_TO_FIRE:
+            reward = 10
             self.changing_to_fire()
         elif self.state == c.DOWN_TO_PIPE:
             self.y_vel = 1
@@ -169,6 +182,7 @@ class Player(pg.sprite.Sprite):
             self.rect.y += self.y_vel
             if self.rect.bottom < self.up_pipe_y:
                 self.state = c.STAND
+        return reward
 
     def check_to_allow_jump(self, keys):
         if not keys[tools.keybinding['jump']]:
