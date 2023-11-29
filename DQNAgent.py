@@ -53,24 +53,40 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
             
-def train_dqn(episode):
-    loss = []
-    agent = DQNAgent(state_size, action_size)
-    for e in range(episode):
-        state = get_state()  # Define your own function to get the state
-        state = np.reshape(state, [1, state_size])
-        done = False
-        i = 0
-        while not done:
-            action = agent.act(state)
-            next_state, reward, done = step(action)  # Define your own function to take a step
-            next_state = np.reshape(next_state, [1, state_size])
-            agent.remember(state, action, reward, next_state, done)
-            state = next_state
-            if done:
-                print("episode: {}/{}, score: {}, e: {:.2}".format(e, episode, i, agent.epsilon))
-                break
-            if len(agent.memory) > batch_size:
-                agent.replay(batch_size)
-        if e % 10 == 0:
-            agent.save("./save/mario-dqn.h5")
+class MockDQNAgent:
+    def __init__(self, state_shape, action_size, max_mem=10):
+        self.action_size = action_size
+
+    def _build_model(self):
+        pass
+
+    def remember(self, state, action, reward, next_state, done):
+        pass
+
+    def act(self, state):
+        return random.randrange(self.action_size)
+
+    def replay(self, batch_size):
+        pass
+
+# def train_dqn(episode):
+#     loss = []
+#     agent = DQNAgent(state_size, action_size)
+#     for e in range(episode):
+#         state = get_state()  # Define your own function to get the state
+#         state = np.reshape(state, [1, state_size])
+#         done = False
+#         i = 0
+#         while not done:
+#             action = agent.act(state)
+#             next_state, reward, done = step(action)  # Define your own function to take a step
+#             next_state = np.reshape(next_state, [1, state_size])
+#             agent.remember(state, action, reward, next_state, done)
+#             state = next_state
+#             if done:
+#                 print("episode: {}/{}, score: {}, e: {:.2}".format(e, episode, i, agent.epsilon))
+#                 break
+#             if len(agent.memory) > batch_size:
+#                 agent.replay(batch_size)
+#         if e % 10 == 0:
+#             agent.save("./save/mario-dqn.h5")

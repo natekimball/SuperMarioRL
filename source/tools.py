@@ -4,7 +4,7 @@ import os
 import pygame as pg
 from abc import ABC, abstractmethod
 import numpy as np
-from source.DQNAgent import DQNAgent
+from DQNAgent import DQNAgent, MockDQNAgent
 
 keybinding = {
     'action':pg.K_s,
@@ -79,7 +79,7 @@ class Control():
         return pg.surfarray.array3d(self.screen)
     
     def main(self, episodes=1000):
-        agent = DQNAgent(self.screen.get_size() + (3,), 3)
+        agent = MockDQNAgent(self.screen.get_size() + (3,), 3)
         for e in range(episodes):
             while not self.state.done:
                 self.current_time = pg.time.get_ticks()
