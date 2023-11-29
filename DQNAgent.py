@@ -20,12 +20,10 @@ class DQNAgent:
 
     def _build_model(self):
         model = Sequential([
-            Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=self.state_shape),
-            Conv2D(64, kernel_size=(3, 3), activation='relu'),
-            Conv2D(128, kernel_size=(3, 3), activation='relu'),
+            Conv2D(32, kernel_size=(3, 3), activation='selu', padding='same', input_shape=self.state_shape),
+            Conv2D(64, kernel_size=(3, 3), activation='selu', padding='same'),
             Flatten(),
-            Dense(64, activation='relu'),
-            Dense(256, activation='relu'),
+            Dense(64, activation='selu'),
             Dense(self.action_size, activation='linear')
         ])
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -52,6 +50,9 @@ class DQNAgent:
             self.model.fit(state, target, epochs=1, verbose=0)
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+            
+    def save(self, filename):
+        self.model.save(filename)
             
 class MockDQNAgent:
     def __init__(self, state_shape, action_size, max_mem=10):

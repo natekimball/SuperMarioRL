@@ -60,6 +60,7 @@ for e in range(EPISODES):
     scores.append(score)
     moving_avg_score = np.mean(scores[-100:])  # calculate moving average of last 100 scores
     moving_avg_scores.append(moving_avg_score)
+agent.save('mario-v1')
 
 plt.figure(figsize=(10, 5))
 plt.plot(scores, label='Score')
