@@ -21,11 +21,11 @@ class DQNAgent:
     def _build_model(self):
         model = Sequential([
             Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=self.state_shape),
-            # Conv2D(64, kernel_size=(3, 3), activation='relu'),
-            # Conv2D(128, kernel_size=(3, 3), activation='relu'),
+            Conv2D(64, kernel_size=(3, 3), activation='relu'),
+            Conv2D(128, kernel_size=(3, 3), activation='relu'),
             Flatten(),
             Dense(64, activation='relu'),
-            # Dense(256, activation='relu'),
+            Dense(256, activation='relu'),
             Dense(self.action_size, activation='linear')
         ])
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
