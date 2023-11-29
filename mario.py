@@ -26,6 +26,7 @@ for e in range(EPISODES):
         action = agent.act(state)
         next_state, reward, terminated, truncated, info = env.step(action)
         reward = reward if not done else -10
+        print(agent.epsilon)
         # next_state = np.reshape(next_state, [1, [state_shape[0], state_shape[1], state_shape[2]])
         agent.remember(state, action, reward, next_state, done)
         state = next_state

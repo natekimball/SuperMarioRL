@@ -39,7 +39,6 @@ class DQNAgent:
         return np.argmax(q_values[0])
 
     def replay(self, batch_size):
-        print("Replaying")
         minibatch = random.sample(self.memory, batch_size)
         states = np.array([s[0] for s in minibatch])
         futures = np.max(self.model.predict([f[3] for f in minibatch]), axis=1)

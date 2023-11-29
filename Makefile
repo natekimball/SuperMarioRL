@@ -1,5 +1,5 @@
 sync:
-	rsync -avz mario.py DQNAgent.py requirements.txt train.slurm tma5gv@rivanna:/scratch/tma5gv/SuperMarioRL
+	rsync -avz Makefile mario.py DQNAgent.py requirements.txt train.slurm tma5gv@rivanna:/scratch/tma5gv/SuperMarioRL
 
 run:
 	singularity exec --bind `pwd`:/home --pwd /home --nv images/gym.sif python mario.py
