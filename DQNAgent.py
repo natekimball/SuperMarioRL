@@ -9,6 +9,7 @@ import random
 class DQNAgent:
     def __init__(self, state_shape, action_size, max_mem=4000, epsilon_decay=0.9999, gamma=0.99, test_mode=False, model_path=None):
         self.state_shape = state_shape
+        print(state_shape)
         self.action_size = action_size
         self.memory = deque(maxlen=max_mem)
         self.gamma = gamma  # discount rate
@@ -25,9 +26,9 @@ class DQNAgent:
     def _build_model(self):
         model = Sequential([
             Conv2D(32, kernel_size=(3, 3), activation='selu', padding='same', input_shape=self.state_shape),
-            Conv2D(64, kernel_size=(3, 3), activation='selu', padding='same'),
+            # Conv2D(64, kernel_size=(3, 3), activation='selu', padding='same'),
             Flatten(),
-            Dense(64, activation='selu'),
+            # Dense(64, activation='selu'),
             Dense(self.action_size, activation='linear')
         ])
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))
