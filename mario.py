@@ -11,34 +11,52 @@ env = JoypadSpace(env, SIMPLE_MOVEMENT)
 
 state_shape = env.observation_space.shape
 action_size = env.action_space.n
-EPISODES = 500
 agent = DQNAgent(state_shape, action_size)
+batch_size = 64
 
-done = False
-batch_size = 32
-
+EPISODES = 1
 scores = []
 moving_avg_scores = []
 for e in range(EPISODES):
     state, info = env.reset()
-    # image = np.reshape(state[0], [1, state_shape[0], state_shape[1], state_shape[2]])
+    done = False
+    score = 0
     for time in range(5000):
         action = agent.act(state)
         next_state, reward, terminated, truncated, info = env.step(action)
-        reward = reward if not done else -10
-        print(agent.epsilon)
-        # next_state = np.reshape(next_state, [1, [state_shape[0], state_shape[1], state_shape[2]])
+        done = terminated or truncated
         agent.remember(state, action, reward, next_state, done)
         state = next_state
         score = info['score']
         if done:
-            print("episode: {}/{}, score: {}, e: {:.2}".format(e, EPISODES, time, agent.epsilon))
             break
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
+    print(f"episode: {e}/{EPISODES}, score: {score}, ε: {agent.epsilon:.2}")
     scores.append(score)
-    moving_avg_score = np.mean(scores[-100:])  # calculate moving average of last 100 scores
-    moving_avg_scores.append(moving_avg_score)
+    moving_avg_scores.append(np.mean(scores[-100:]))
+
+# e = 1
+# done = True
+# for time in range(1000000):
+#     if done:
+#         state, info = env.reset()
+#     action = agent.act(state)
+#     next_state, reward, terminated, truncated, info = env.step(action)
+#     done = terminated or truncated
+#     agent.remember(state, action, reward, next_state, done)
+#     state = next_state
+#     if len(agent.memory) > batch_size:
+#         agent.replay(batch_size)
+#     if done:
+#         score = info['score']
+#         print(f"episode: {e}, score: {score}, ε: {agent.epsilon:.2}, time-step: {time}")
+#         scores.append(score)
+#         moving_avg_scores.append(np.mean(scores[-100:]))
+#         break
+#     e += 1
+    
+env.close()
 agent.save('mario-v1')
 
 plt.figure(figsize=(10, 5))
